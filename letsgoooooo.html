@@ -8,19 +8,36 @@
     <script src="./play.js"></script>
   </head>
   <body>
-    <button onclick="newSong();">노래 초기화</button>
-    <button onclick="song.start();">노래 재생</button>
-    <button onclick="song.duration()">현재 재생 초</button>
-    <span id="playTime">00:00</span>
-    <input
-      type="range"
-      id="playback"
-      value="0"
-      min="0"
-      max="100"
-      oninput="song.changeTime(this)"
-    />
+    <div>
+      <button onclick="newSong();">노래 초기화</button>
+      <button onclick="song.start();">노래 재생</button>
+      <button onclick="song.pause();">노래 일시 정지</button>
+      <button onclick="song.duration()">현재 재생 초</button>
+      <div style="display: flex">
+        <span id="playTime">00:00</span>
+        <input
+          type="range"
+          id="playback"
+          value="0"
+          min="0"
+          max="100"
+          oninput="song.changeTime(this)"
+        />
+      </div>
+    </div>
+    <div id="screen"></div>
   </body>
 
-  <script></script>
+  <style>
+    #screen {
+      width: 100%;
+      height: 500px;
+      background-color: aliceblue;
+      margin-top: 10px;
+    }
+
+    #playback {
+      width: 100%;
+    }
+  </style>
 </html>

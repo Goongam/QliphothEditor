@@ -1,10 +1,19 @@
 let song = null;
 
+class Note{
+    constructor(type, time, longNoteTime) {
+        this.type = type;
+        this.time = time;
+        this.longNoteTime = longNoteTime;
+    }   
+}
+
 class Song{
     sound = null;
     frame = null;
     timeElement = null;
     playbackRangeElement = null;
+    pattern = [];
 
     init(sound){
         this.sound = sound;
@@ -12,11 +21,12 @@ class Song{
         this.timeElement = document.querySelector("#playTime");
 
         this.frame = setInterval(()=>{
-            console.log(this.sound.seek());
+            // console.log(this.sound.seek());
             
             this.playbackRangeElement.value = this.sound.seek();
+     
             this.changeTimeElement();
-        },200);
+        },10);
     }
 
     start(){
@@ -24,6 +34,10 @@ class Song{
         console.log(this.sound.duration());
     }
     
+    pause(){
+        this.sound.pause();
+    }
+
     duration() {
         console.log(this.sound.seek());
     }
@@ -36,11 +50,14 @@ class Song{
     }
 
     changeTimeElement(){
-        const m = `${Math.floor(this.playbackRangeElement.value / 60)}`.padStart(2,'0');
-        const s = `${this.playbackRangeElement.value % 60}`.padStart(2,'0');
-        console.log(this.playbackRangeElement);
+        // console.log("vv"+this.playbackRangeElement.value);
+        const currentTime = this.sound.seek();
+
+        const m = `${Math.floor(currentTime / 60)}`.padStart(2,'0');
+        const s = `${Math.floor(currentTime % 60)}`.padStart(2,'0');
+        const ms = `${currentTime}`.split('.')[1]?.slice(0,1);
         
-        playTime.innerHTML = `${m}:${s}`;
+        playTime.innerHTML = `${m}:${s}:${ms ?? '0'}`;
     }
 }
 
