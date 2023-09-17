@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <meta charset="UTF-8" /> -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
     <title>Document</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
     <script src="./play.js"></script>
   </head>
-  <body>
-    <div>
-      <button onclick="newSong();">노래 초기화</button>
-      <button onclick="song.start();">노래 재생</button>
-      <button onclick="song.pause();">노래 일시 정지</button>
-      <button onclick="song.duration()">현재 재생 초</button>
-      <div style="display: flex">
-        <span id="playTime">00:00</span>
+  <body style="display: flex; flex-direction: column; align-items: center">
+    <div style="width: 100%; max-width: 1920px">
+      <button class="optionBtn" onclick="newSong();">노래 초기화</button>
+      <button class="optionBtn" onclick="song.start();">노래 재생</button>
+      <button class="optionBtn" onclick="song.pause();">노래 일시 정지</button>
+      <button class="optionBtn" onclick="song.duration()">현재 재생 초</button>
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span id="playTime" class="time">00:00:0</span>
         <input
           type="range"
           id="playback"
@@ -23,21 +23,158 @@
           max="100"
           oninput="song.changeTime(this)"
         />
+        <span id="endTime" class="time">00:00:0</span>
       </div>
     </div>
-    <div id="screen"></div>
+    <div id="screen" style="position: relative">
+      <div class="interface interface-top"></div>
+      <div class="interface interface-bottom"></div>
+    </div>
   </body>
 
+  <script>
+    // console.log((document.querySelector("#screen").style.display = "none"));
+  </script>
   <style>
     #screen {
-      width: 100%;
-      height: 500px;
+      width: 1920px;
+      height: 1080px;
       background-color: aliceblue;
       margin-top: 10px;
     }
 
     #playback {
       width: 100%;
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+      border: 30px;
+      height: 100px;
+    }
+
+    .interface {
+      position: absolute;
+
+      width: 100%;
+      border-bottom: 1px solid black;
+    }
+
+    .interface-top {
+      top: 100px;
+    }
+
+    .interface-bottom {
+      bottom: 100px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      margin: 18px 0;
+      width: 200px;
+    }
+    input[type="range"]:focus {
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      animate: 0.2s;
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      background: #3071a9;
+      border-radius: 1.3px;
+      border: 0.2px solid #010101;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      border: 1px solid #000000;
+      height: 36px;
+      width: 16px;
+      border-radius: 3px;
+      background: #ffffff;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -14px;
+    }
+    input[type="range"]:focus::-webkit-slider-runnable-track {
+      background: #367ebd;
+    }
+    input[type="range"]::-moz-range-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      animate: 0.2s;
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      background: #3071a9;
+      border-radius: 1.3px;
+      border: 0.2px solid #010101;
+    }
+    input[type="range"]::-moz-range-thumb {
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      border: 1px solid #000000;
+      height: 36px;
+      width: 16px;
+      border-radius: 3px;
+      background: #ffffff;
+      cursor: pointer;
+    }
+
+    /* CSS is missing in your code  */
+    input[type="range"]::-ms-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      animate: 0.2s;
+      background: transparent;
+      border-color: transparent;
+      border-width: 16px 0;
+      color: transparent;
+    }
+    input[type="range"]::-ms-fill-lower {
+      background: #2a6495;
+      border: 0.2px solid #010101;
+      border-radius: 2.6px;
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+    }
+    input[type="range"]::-ms-fill-upper {
+      background: #3071a9;
+      border: 0.2px solid #010101;
+      border-radius: 2.6px;
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+    }
+    input[type="range"]::-ms-thumb {
+      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+      border: 1px solid #000000;
+      height: 36px;
+      width: 16px;
+      border-radius: 3px;
+      background: #ffffff;
+      cursor: pointer;
+    }
+    input[type="range"]:focus::-ms-fill-lower {
+      background: #3071a9;
+    }
+    input[type="range"]:focus::-ms-fill-upper {
+      background: #367ebd;
+    }
+
+    .optionBtn {
+      width: 170px;
+      height: 30px;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .time {
+      font-size: 30px;
+    }
+
+    .diamond {
+      width: 0;
+      height: 0;
+      border: 50px solid black;
+      position: absolute;
+      transform: rotate(45deg);
     }
   </style>
 </html>
