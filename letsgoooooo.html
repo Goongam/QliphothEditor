@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="./play.js"></script>
+  </head>
+  <body>
+    <button onclick="newSong();">노래 초기화</button>
+    <button onclick="song.start();">노래 재생</button>
+    <button onclick="song.duration()">현재 재생 초</button>
+    <span id="playTime">00:00</span>
+    <input
+      type="range"
+      id="playback"
+      value="0"
+      min="0"
+      max="100"
+      oninput="song.changeTime(this)"
+    />
+  </body>
+
+  <script></script>
+</html>
