@@ -6,6 +6,7 @@
     <title>Document</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
     <script src="./play.js"></script>
+    <link rel="stylesheet" href="./range.css" type="text/css" />
   </head>
   <body style="display: flex; flex-direction: column; align-items: center">
     <div style="width: 100%; max-width: 1920px">
@@ -25,22 +26,131 @@
         />
         <span id="endTime" class="time">00:00:0</span>
       </div>
+      <div id="noteType">
+        <button
+          class="optionBtn noteTypeBtn"
+          onclick="song.changeNoteType(NOTE_TYPE.normal1, this)"
+          style="background-color: yellow"
+        >
+          일반1
+        </button>
+        <button
+          class="optionBtn noteTypeBtn"
+          onclick="song.changeNoteType(NOTE_TYPE.normal2, this)"
+          style="background-color: white"
+        >
+          일반2
+        </button>
+        <button
+          class="optionBtn noteTypeBtn"
+          onclick="song.changeNoteType(NOTE_TYPE.normal3, this)"
+          style="background-color: white"
+        >
+          일반3
+        </button>
+        <button
+          class="optionBtn noteTypeBtn"
+          onclick="song.changeNoteType(NOTE_TYPE.long, this)"
+          style="background-color: white"
+        >
+          롱
+        </button>
+        <button
+          class="optionBtn noteTypeBtn"
+          onclick="song.changeNoteType(NOTE_TYPE.slide, this)"
+          style="background-color: white"
+        >
+          슬라이드
+        </button>
+      </div>
     </div>
-    <div id="screen" style="position: relative">
-      <div class="interface interface-top"></div>
-      <div class="interface interface-bottom"></div>
+    <div style="display: flex; margin-top: 10px">
+      <div id="screen" style="position: relative">
+        <div class="interface interface-top"></div>
+        <div class="interface interface-bottom"></div>
+      </div>
+      <div id="noteDetail">
+        <div>
+          Note ID :
+          <span id="detailID">-</span>
+        </div>
+        <div>
+          Note Type:
+          <select id="detailType">
+            <option value="normal1">일반1</option>
+            <option value="normal2">일반2</option>
+            <option value="normal3">일반3</option>
+            <option value="long">롱</option>
+            <option value="slide">슬라이드</option>
+          </select>
+        </div>
+
+        <div>
+          Time:
+          <input
+            type="text"
+            id="detailTime"
+            placeholder="00:00:0"
+            pattern="\d{2}:\d{2}:\d{1}"
+          />
+        </div>
+        <div>
+          End Time(롱노트):
+          <input
+            type="text"
+            id="detailEndTime"
+            placeholder="00:00:0"
+            pattern="\d{2}:\d{2}:\d{1}"
+          />
+        </div>
+        <div>
+          <button id="detailDeleteBtn" onclick="song.deleteNote()">삭제</button>
+        </div>
+      </div>
     </div>
   </body>
 
-  <script>
-    // console.log((document.querySelector("#screen").style.display = "none"));
-  </script>
+  <script></script>
   <style>
+    .noteBorder {
+      position: absolute;
+      border: 1px solid black;
+
+      /* 배경색 설정 (투명) */
+      background-color: transparent;
+
+      /* 초기 크기 설정 (로딩 시에 바로 적용) */
+
+      /* 초기 스케일 설정 */
+      transform: rotate(45deg) scale(1.5); /* 초기 스케일을 1.5로 설정 */
+      transform-origin: center center; /* 가운데를 중심으로 설정 */
+
+      /* 크기 애니메이션 설정 */
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .loaded {
+      transform: rotate(45deg) scale(1) !important; /* 로딩 시 스케일을 1로 줄임 */
+    }
+
+    /* 애니메이션 키 프레임 정의 */
+    /* @keyframes shrink {
+      0% {
+        scale: (1);
+      }
+      100% {
+        scale: (1.5);
+      }
+    }
+*/
+    * {
+      font-size: 30px;
+    }
+
     #screen {
       width: 1920px;
       height: 1080px;
-      background-color: aliceblue;
-      margin-top: 10px;
+      background-color: #1b2b2b8e;
     }
 
     #playback {
@@ -50,6 +160,27 @@
       color: transparent;
       border: 30px;
       height: 100px;
+    }
+
+    #noteDetail {
+      width: 400px;
+      height: auto;
+      border: 1px solid black;
+      margin-left: 10px;
+
+      font-size: 30px;
+
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #noteDetail {
+      background-color: gray;
+    }
+
+    #noteDetail > div > * {
+      background-color: gray;
     }
 
     .interface {
@@ -67,101 +198,10 @@
       bottom: 100px;
     }
 
-    input[type="range"] {
-      -webkit-appearance: none;
-      margin: 18px 0;
-      width: 200px;
-    }
-    input[type="range"]:focus {
-      outline: none;
-    }
-    input[type="range"]::-webkit-slider-runnable-track {
-      width: 100%;
-      height: 8.4px;
-      cursor: pointer;
-      animate: 0.2s;
-      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-      background: #3071a9;
-      border-radius: 1.3px;
-      border: 0.2px solid #010101;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-      border: 1px solid #000000;
-      height: 36px;
-      width: 16px;
-      border-radius: 3px;
-      background: #ffffff;
-      cursor: pointer;
-      -webkit-appearance: none;
-      margin-top: -14px;
-    }
-    input[type="range"]:focus::-webkit-slider-runnable-track {
-      background: #367ebd;
-    }
-    input[type="range"]::-moz-range-track {
-      width: 100%;
-      height: 8.4px;
-      cursor: pointer;
-      animate: 0.2s;
-      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-      background: #3071a9;
-      border-radius: 1.3px;
-      border: 0.2px solid #010101;
-    }
-    input[type="range"]::-moz-range-thumb {
-      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-      border: 1px solid #000000;
-      height: 36px;
-      width: 16px;
-      border-radius: 3px;
-      background: #ffffff;
-      cursor: pointer;
-    }
-
-    /* CSS is missing in your code  */
-    input[type="range"]::-ms-track {
-      width: 100%;
-      height: 8.4px;
-      cursor: pointer;
-      animate: 0.2s;
-      background: transparent;
-      border-color: transparent;
-      border-width: 16px 0;
-      color: transparent;
-    }
-    input[type="range"]::-ms-fill-lower {
-      background: #2a6495;
-      border: 0.2px solid #010101;
-      border-radius: 2.6px;
-      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-    }
-    input[type="range"]::-ms-fill-upper {
-      background: #3071a9;
-      border: 0.2px solid #010101;
-      border-radius: 2.6px;
-      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-    }
-    input[type="range"]::-ms-thumb {
-      box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-      border: 1px solid #000000;
-      height: 36px;
-      width: 16px;
-      border-radius: 3px;
-      background: #ffffff;
-      cursor: pointer;
-    }
-    input[type="range"]:focus::-ms-fill-lower {
-      background: #3071a9;
-    }
-    input[type="range"]:focus::-ms-fill-upper {
-      background: #367ebd;
-    }
-
     .optionBtn {
-      width: 170px;
-      height: 30px;
-      font-size: 17px;
+      width: 200px;
+      height: 50px;
+      font-size: 23px;
       font-weight: bold;
     }
 
@@ -172,9 +212,11 @@
     .diamond {
       width: 0;
       height: 0;
-      border: 50px solid black;
+      border: 1px solid black;
+      /* background-color: black; */
       position: absolute;
       transform: rotate(45deg);
+      /* transform: translateX(-50px); */
     }
   </style>
 </html>
