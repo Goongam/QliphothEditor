@@ -105,6 +105,7 @@ class Song{
 
         this.selectNoteId = undefined;
 
+        document.querySelector("#detailID").style = 'background-color: gray';
         document.querySelector('#noteDetail').style = 'background-color: gray';
         document.querySelector("#detailType").style = 'background-color: gray';
         document.querySelector("#detailTime").style = 'background-color: gray';
