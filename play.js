@@ -25,6 +25,14 @@ const NOTE_COLOR = {
     slide:'orange',
 }
 
+const NOTE_EXPORT_NAME = {
+    normal1 : "smallNormalNote",
+    normal2: "normalNote",
+    normal3:"bigNormalNote",
+    long:"longNote",
+    slide:"slideNote",
+}
+
 //"노트의 종류", "노트가 생기는 시각", "노트가 생길 좌표", "노트 순서", "동타 여부", "롱노트 일때 지속시간"
 class Note{
     constructor(id, type, time, pos, seq, isSame, endTime, isShow) {
@@ -213,12 +221,20 @@ class Song{
     }
 
     editNoteType(e){
+        const changeType = e.target.value;
+
         this.pattern.map((note) => {
             if(note.id === this.selectNoteId){
-                note.type = e.target.value;          
+                //롱노트 였다면 endtime을 startTime과 맞춰줌
+                if(note.type === NOTE_TYPE.long){
+                    note.endTime = note.time;
+                }
+
+                note.type = changeType;
+                
                 this.clickedNoteElement.classList.forEach((className)=>{
                     if(className.startsWith('type-')){
-                        this.clickedNoteElement.classList.replace(className,`type-${e.target.value}`);     
+                        this.clickedNoteElement.classList.replace(className,`type-${changeType}`);     
                     }
                 })  
             }
@@ -229,6 +245,7 @@ class Song{
         this.pattern.map((note) => {
             if(note.id === this.selectNoteId){
                 //끝나는 시간 수정
+                
                 if(note.type !== NOTE_TYPE.long){
                     note.endTime = getTimeFromFormatTime(e.target.value);   
                 }else{
@@ -245,8 +262,7 @@ class Song{
     }
 
     editNoteEndTime(e){
-        console.log('수정');
-        
+   
         this.pattern.map((note) => {
             if(note.id === this.selectNoteId){
                 //시작 시간이 보다 작으면 return, 롱노트가 아니면 return
@@ -256,10 +272,33 @@ class Song{
                     return;
                 }
                 //끝나는 시간 수정
+
                 note.endTime = getTimeFromFormatTime(e.target.value);   
             }
         })
     }
+
+    //new Note("slideNote", "11.2", "(1000,700,0)", "12", "false", "")
+    export(){
+        const ptn =this.pattern.sort((a,b) => a.time - b.time);
+        const samePtn = ptn.map((note,idx) => {
+            const copyNote = {...note};
+
+            const prevIdx = idx - 1;
+            const nextIdx = idx + 1;
+            if(idx !== 0 && ptn[prevIdx].time === copyNote.time) copyNote.isSame = true;
+            else if(idx !== ptn.length - 1 && ptn[nextIdx].time === copyNote.time) copyNote.isSame = true;
+            
+            return copyNote;
+        });
+        const result = samePtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(1)}","(${note.pos},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
+        
+        document.querySelector("#exportContent").innerText = result.join(',\n');
+        openExportPanel();
+        console.log(result.join(',\n'));
+        
+    }
+
     frame(){
         //시간, 바 표시
         this.playbackRangeElement.value = this.sound.seek() * 100;
@@ -344,7 +383,15 @@ function getFormatTime(time){
 
 function getTimeFromFormatTime(formatTime){
     const sp = formatTime.split(':');
-    return +sp[0] * 60 + +sp[1] + +sp[2];
+    return +sp[0] * 60 + +sp[1] + (+sp[2])/10;
+}
+
+function closeExportPanel() {
+    document.querySelector("#exportPanel").style.display = "none";
+  }
+
+function openExportPanel(){
+    document.querySelector("#exportPanel").style.display = "flex";
 }
 
 

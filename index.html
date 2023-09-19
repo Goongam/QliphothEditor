@@ -6,14 +6,48 @@
     <title>Document</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
     <script src="./play.js"></script>
+    <script src="./copy.js"></script>
     <link rel="stylesheet" href="./range.css" type="text/css" />
   </head>
   <body style="display: flex; flex-direction: column; align-items: center">
+    <div
+      style="
+        position: absolute;
+        display: none;
+        flex-direction: column;
+        max-width: 1000px;
+        width: 100%;
+        height: auto;
+        max-height: 2000px;
+        background-color: aliceblue;
+        border: 1px solid black;
+        padding: 10px;
+        z-index: 100;
+      "
+      id="exportPanel"
+    >
+      <div style="margin-left: auto; display: flex; border-bottom: black">
+        <button onclick="doCopy('text')">복사</button>
+        <button style="margin-left: 10px" onclick="closeExportPanel()">
+          X
+        </button>
+      </div>
+      <div
+        style="
+          background-color: white;
+          border: 1px solid black;
+          margin-top: 10px;
+          overflow: scroll;
+        "
+        id="exportContent"
+      ></div>
+    </div>
     <div style="width: 100%; max-width: 1920px">
       <button class="optionBtn" onclick="newSong();">노래 초기화</button>
       <button class="optionBtn" onclick="song.start();">노래 재생</button>
       <button class="optionBtn" onclick="song.pause();">노래 일시 정지</button>
       <button class="optionBtn" onclick="song.duration()">현재 재생 초</button>
+      <button class="optionBtn" onclick="song.export()">코드로 추출</button>
       <div style="display: flex; align-items: center; gap: 10px">
         <span id="playTime" class="time">00:00:0</span>
         <input
