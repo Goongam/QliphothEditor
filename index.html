@@ -48,13 +48,7 @@
         >
           일반3
         </button>
-        <button
-          class="optionBtn noteTypeBtn"
-          onclick="song.changeNoteType(NOTE_TYPE.long, this)"
-          style="background-color: white"
-        >
-          롱
-        </button>
+
         <button
           class="optionBtn noteTypeBtn"
           onclick="song.changeNoteType(NOTE_TYPE.slide, this)"
@@ -62,6 +56,14 @@
         >
           슬라이드
         </button>
+        <button
+          class="optionBtn noteTypeBtn"
+          onclick="song.changeNoteType(NOTE_TYPE.long, this)"
+          style="background-color: white"
+        >
+          롱
+        </button>
+        <input id="longNoteInput" type="number" disabled value="2" /> 초
       </div>
     </div>
     <div style="display: flex; margin-top: 10px">
@@ -143,14 +145,14 @@
 
     /* 애니메이션 키 프레임 정의 */
     /* @keyframes shrink {
-      0% {
-        scale: (1);
-      }
-      100% {
-        scale: (1.5);
-      }
-    }
-*/
+          0% {
+            scale: (1);
+          }
+          100% {
+            scale: (1.5);
+          }
+        }
+    */
     * {
       font-size: 30px;
     }
@@ -184,8 +186,8 @@
     }
 
     /* #noteDetail > div > * {
-      background-color: gray;
-    } */
+          background-color: gray;
+        } */
 
     .inactive {
       background-color: gray;
@@ -229,6 +231,40 @@
       position: absolute;
       transform: rotate(45deg);
       /* transform: translateX(-50px); */
+    }
+
+    .type-normal1 {
+      width: 100px;
+      height: 100px;
+      background-color: #87ceeb;
+      transform: translate(-50px, -50px) rotate(45deg);
+    }
+
+    .type-normal2 {
+      width: 170px;
+      height: 170px;
+      background-color: #87ceeb;
+      transform: translate(-85px, -85px) rotate(45deg);
+    }
+
+    .type-normal3 {
+      width: 250px;
+      height: 250px;
+      background-color: #87ceeb;
+      transform: translate(-125px, -125px) rotate(45deg);
+    }
+
+    .type-long {
+      width: 250px;
+      height: 250px;
+      background-color: #e6e6fa;
+      transform: translate(-125px, -125px) rotate(45deg);
+    }
+    .type-slide {
+      width: 170px;
+      height: 170px;
+      background-color: orange;
+      transform: translate(-85px, -85px) rotate(45deg);
     }
   </style>
 </html>
