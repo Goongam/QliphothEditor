@@ -10,11 +10,11 @@ const NOTE_TYPE = {
     slide: "slide",
 }
 const NOTE_SIZE = {
-    normal1: 50,
-    normal2: 100,
-    normal3: 150,
-    long:100,
-    slide:100,
+    normal1: 100,
+    normal2: 170,
+    normal3: 250,
+    long:250,
+    slide:170,
 }
 
 const NOTE_COLOR = {
@@ -105,12 +105,12 @@ class Song{
 
         this.selectNoteId = undefined;
 
-        document.querySelector("#detailID").style = 'background-color: gray';
-        document.querySelector('#noteDetail').style = 'background-color: gray';
-        document.querySelector("#detailType").style = 'background-color: gray';
-        document.querySelector("#detailTime").style = 'background-color: gray';
-        document.querySelector("#detailEndTime").style = 'background-color: gray';
-        document.querySelector("#detailDeleteBtn").style = 'background-color: gray';
+        document.querySelector("#detailID").className = 'inactive';
+        document.querySelector('#noteDetail').className = 'inactive';
+        document.querySelector("#detailType").className = 'inactive';
+        document.querySelector("#detailTime").className = 'inactive';
+        document.querySelector("#detailEndTime").className = 'inactive';
+        document.querySelector("#detailDeleteBtn").className = 'inactive';
 
         document.querySelector("#detailID").innerText = '-';
         document.querySelector("#detailType").value = '';
@@ -173,12 +173,13 @@ class Song{
             this.selectNoteId = note.id;
 
 
-            document.querySelector('#noteDetail').style = 'background-color: white';
-            document.querySelector("#detailType").style = 'background-color: white';
-            document.querySelector("#detailTime").style = 'background-color: white';
-            document.querySelector("#detailEndTime").style = 'background-color: white';
-            document.querySelector("#detailDeleteBtn").style = 'background-color: white';
-            document.querySelector("#detailID").style = 'background-color: white';
+            document.querySelector('#noteDetail').className = 'active';
+            document.querySelector("#detailType").className = 'active';
+            document.querySelector("#detailTime").className = 'active';
+            document.querySelector("#detailEndTime").className = 'active';
+            document.querySelector("#detailDeleteBtn").className = 'active';
+
+            document.querySelector("#detailID").className = 'active';
 
             document.querySelector("#detailID").innerText = note.id;
             document.querySelector("#detailType").value = note.type;
@@ -222,7 +223,12 @@ class Song{
                     top:${note.pos.split('.')[1]}px;
                     background-color: ${NOTE_COLOR[note.type]};
                     transform: translate(-${NOTE_SIZE[note.type] / 2}px, -${NOTE_SIZE[note.type] / 2}px) rotate(45deg);
-                `
+                    display:flex;
+                    justify-content: center;
+                    align-items: center;
+                `;
+                diamondDiv.innerHTML = `
+                <div style="transform: rotate(-45deg);">${note.id}</div>`;
                 this.screen.appendChild(diamondDiv);
 
                 //보더생성
