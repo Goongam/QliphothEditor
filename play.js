@@ -291,7 +291,8 @@ class Song{
             
             return copyNote;
         });
-        const result = samePtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(1)}","(${note.pos},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
+
+        const result = samePtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(1)}","(${ note.pos.split('.')[0]},${ 1080 - note.pos.split('.')[1]},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
         
         document.querySelector("#exportContent").innerText = result.join(',\n');
         openExportPanel();
