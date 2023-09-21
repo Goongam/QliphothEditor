@@ -33,6 +33,8 @@ const NOTE_EXPORT_NAME = {
     slide:"slideNote",
 }
 
+
+
 //"노트의 종류", "노트가 생기는 시각", "노트가 생길 좌표", "노트 순서", "동타 여부", "롱노트 일때 지속시간"
 class Note{
     constructor(id, type, time, pos, seq, isSame, endTime, isShow) {
@@ -69,6 +71,11 @@ class Song{
         this.detailNoteTypeElement = document.querySelector("#detailType");
         this.detailNoteTimeElement = document.querySelector("#detailTime");
         this.detailEndTimeElement = document.querySelector("#detailEndTime");
+        //요약
+        this.summarySongTimeElement = document.querySelector("#summarySongTime");
+        this.summaryScreenElement = document.querySelector("#summaryScreen");
+
+
         this.clickedNoteElement = undefined;
 
         this.noteIdx = 0;
@@ -79,6 +86,9 @@ class Song{
         this.selectNoteType = NOTE_TYPE.normal1;
 
 
+        
+
+
         this.frameInterval = setInterval(()=>{
             this.frame();
         },100);
@@ -87,9 +97,8 @@ class Song{
             const clickX = event.pageX - this.screen.offsetLeft;
             const clickY = event.pageY - this.screen.offsetTop;
             
-            const elementClicked = document.elementFromPoint(event.pageX, event.pageY);
+            const elementClicked = document.elementFromPoint(event.clientX, event.clientY);
         
-            
             //다른 노트와 겹치는 경우
             if (elementClicked && elementClicked.classList.contains('note')) {
                 elementClicked.classList.forEach(className => {
@@ -123,11 +132,32 @@ class Song{
 
     //"노트의 종류", "노트가 생기는 시각", "노트가 생길 좌표", "노트 순서", "동타 여부", "롱노트 일때 지속시간"
     addNote(type,x, y){
-        
+        const id = this.noteIdx++;
+
         const noteRange = type === NOTE_TYPE.long ? +document.querySelector("#longNoteInput").value : 0;
-        this.pattern.push(new Note(this.noteIdx++,type,this.sound.seek(), `${x}.${y}`,this.pattern.length, false, this.sound.seek() + noteRange, false));
+        this.pattern.push(new Note(id,type,this.sound.seek(), `${x}.${y}`,this.pattern.length, false, this.sound.seek() + noteRange, false));
         
         console.log(this.pattern);
+
+        //요약
+        const summaryNote = document.createElement('div');
+        summaryNote.className = `summaryNote sid-${id}`;
+        summaryNote.style = `
+            left: ${this.sound.seek() * 50 - 50/2}px;
+            width: ${noteRange * 50 + 50/2}px;
+            background-color: ${type === NOTE_TYPE.long ? '#87ceeb' : type === NOTE_TYPE.slide ? 'orange' : 'white'};
+            
+        `;
+        const startTimeEle = document.createElement('span');
+        startTimeEle.style = `font-size : 10px; height:10px`
+        startTimeEle.innerText = this.sound.seek().toFixed(2);
+        const endTimeEle = document.createElement('span');
+        endTimeEle.style = `font-size : 10px; height:10px; margin-left: auto;`;
+        endTimeEle.innerText = (this.sound.seek() + noteRange).toFixed(2);
+
+        summaryNote.appendChild(startTimeEle);
+        summaryNote.appendChild(endTimeEle);
+        this.summaryScreenElement.appendChild(summaryNote);
         
     }
     deleteNote(){
@@ -147,6 +177,10 @@ class Song{
         document.querySelector("#detailTime").value = getFormatTime(0);
         document.querySelector("#detailEndTime").value = getFormatTime(0);
 
+
+        //요약
+        const deleteSummaryNote = document.querySelector(`summaryNote, sid-${this.selectNoteId}`);
+        deleteSummaryNote.remove();
     }
 
 
@@ -286,13 +320,13 @@ class Song{
 
             const prevIdx = idx - 1;
             const nextIdx = idx + 1;
-            if(idx !== 0 && ptn[prevIdx].time === copyNote.time) copyNote.isSame = true;
-            else if(idx !== ptn.length - 1 && ptn[nextIdx].time === copyNote.time) copyNote.isSame = true;
+            if(idx !== 0 && ptn[prevIdx].time.toFixed(2) === copyNote.time.toFixed(2)) copyNote.isSame = true;
+            else if(idx !== ptn.length - 1 && ptn[nextIdx].time.toFixed(2) === copyNote.time.toFixed(2)) copyNote.isSame = true;
             
             return copyNote;
         });
 
-        const result = samePtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(1)}","(${ note.pos.split('.')[0]},${ 1080 - note.pos.split('.')[1]},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
+        const result = samePtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(2)}","(${ note.pos.split('.')[0]},${ 1080 - note.pos.split('.')[1]},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
         
         document.querySelector("#exportContent").innerText = result.join(',\n');
         openExportPanel();
@@ -377,14 +411,14 @@ class Song{
 function getFormatTime(time){
     const m = `${Math.floor(time / 60)}`.padStart(2,'0');
     const s = `${Math.floor(time % 60)}`.padStart(2,'0');
-    const ms = `${time}`.split('.')[1]?.slice(0,1);
-
-    return `${m}:${s}:${ms ?? '0'}`;
+    const ms = `${time.toFixed(2)}`.split('.')[1];
+    
+    return `${m}:${s}:${ms ?? '00'}`;
 }
 
 function getTimeFromFormatTime(formatTime){
     const sp = formatTime.split(':');
-    return +sp[0] * 60 + +sp[1] + (+sp[2])/10;
+    return +sp[0] * 60 + +sp[1] + (+sp[2])/100;
 }
 
 function closeExportPanel() {
@@ -395,6 +429,25 @@ function openExportPanel(){
     document.querySelector("#exportPanel").style.display = "flex";
 }
 
+function summaryInit(sound){
+    //요약 초기화
+    summarySongTimeElement = document.querySelector("#summarySongTime");
+    summaryScreenElement = document.querySelector("#summaryScreen");
+    //초 당 px
+    summarySongTimeElement.style = `
+        width: ${sound.duration() * 51}px;
+    `;
+    summaryScreenElement.style = `
+        width: ${sound.duration() * 51}px;
+    `;
+
+    for(let i = 0 ; i < sound.duration();i++){
+        const timeUnit = document.createElement('div');
+            timeUnit.className = 'timeUnit';
+            timeUnit.innerText = i;
+        summarySongTimeElement.appendChild(timeUnit);
+    }
+}
 
 function newSong(){
     const sound = new Howl({
@@ -402,8 +455,11 @@ function newSong(){
         onload: ()=>{
             const playback = document.querySelector("#playback");
 
+            //재생바
             playback.max = sound.duration() * 100;
             document.querySelector("#endTime").innerHTML = getFormatTime(sound.duration());
+
+            summaryInit(sound);
         }
     });
     song = new Song();

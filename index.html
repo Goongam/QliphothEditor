@@ -152,10 +152,67 @@
         </div>
       </div>
     </div>
+    <div id="summary">
+      <div id="summarySongTime">
+        <!-- <div class="timeUnit">0</div> -->
+      </div>
+      <div id="summaryScreen"></div>
+    </div>
   </body>
 
   <script></script>
   <style>
+    * {
+      font-size: 30px;
+    }
+
+    #summary {
+      overflow-y: scroll;
+      width: 100%;
+      /* max-width: 1920px; */
+      margin: 10px;
+      border-top: 4px double black;
+
+      overflow-x: scroll;
+    }
+    #summarySongTime {
+      position: relative;
+      display: flex;
+      background-color: #85eba7;
+      border-bottom: 1px solid black;
+    }
+    .timeUnit {
+      /* 초 당 px */
+      width: 50px;
+
+      font-size: 15px;
+      position: relative;
+
+      /* border-left: 0.1px solid black; */
+    }
+    #summaryScreen {
+      position: relative;
+      background-color: #56e267;
+    }
+    .summaryNote {
+      position: relative;
+      height: 50px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.332);
+      border-right: 1px solid black;
+      border-top: 1px solid rgba(0, 0, 0, 0.332);
+      font-size: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 40px;
+      padding-bottom: 5px;
+
+      /* 바뀔부분 */
+      background-color: yellow;
+      width: 50px; /* 초 당px: 50 */
+      left: 50px; /* 초 당px: 50 */
+    }
+
     .noteBorder {
       position: absolute;
       border: 1px solid black;
@@ -187,9 +244,6 @@
           }
         }
     */
-    * {
-      font-size: 30px;
-    }
 
     #screen {
       width: 1920px;
@@ -270,28 +324,28 @@
     .type-normal1 {
       width: 100px;
       height: 100px;
-      background-color: #87ceeb;
+      background-color: white;
       transform: translate(-50px, -50px) rotate(45deg);
     }
 
     .type-normal2 {
       width: 170px;
       height: 170px;
-      background-color: #87ceeb;
+      background-color: white;
       transform: translate(-85px, -85px) rotate(45deg);
     }
 
     .type-normal3 {
       width: 250px;
       height: 250px;
-      background-color: #87ceeb;
+      background-color: white;
       transform: translate(-125px, -125px) rotate(45deg);
     }
 
     .type-long {
       width: 250px;
       height: 250px;
-      background-color: #e6e6fa;
+      background-color: #87ceeb;
       transform: translate(-125px, -125px) rotate(45deg);
     }
     .type-slide {
