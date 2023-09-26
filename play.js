@@ -67,6 +67,8 @@ class Song{
         // 노트 타입 선택
         this.noteTypeElement = document.querySelector("#selectedNoteType");
         this.noteTypeBtn = document.querySelectorAll(".noteTypeBtn");
+        //롱 노트길이
+        this.longNoteRangeElement = document.querySelector("#longNoteInput");
         // 노트 상세 element
         this.detailNoteTypeElement = document.querySelector("#detailType");
         this.detailNoteTimeElement = document.querySelector("#detailTime");
@@ -82,12 +84,7 @@ class Song{
 
         this.selectNoteId = undefined;
 
-
         this.selectNoteType = NOTE_TYPE.normal1;
-
-
-        
-
 
         this.frameInterval = setInterval(()=>{
             this.frame();
@@ -99,6 +96,8 @@ class Song{
             
             const elementClicked = document.elementFromPoint(event.clientX, event.clientY);
         
+            console.log(elementClicked);
+            
             //다른 노트와 겹치는 경우
             if (elementClicked && elementClicked.classList.contains('note')) {
                 elementClicked.classList.forEach(className => {
@@ -112,6 +111,38 @@ class Song{
                 this.addNote(this.selectNoteType,clickX,clickY);
                 console.log('클릭한 위치에 note 클래스를 가진 요소가 없습니다.');
             }        
+        });
+
+        this.screen.addEventListener("mousemove",(e)=>{
+
+            const prevPreviews = document.querySelectorAll('.preview');
+
+            prevPreviews.forEach((prevPreview) => prevPreview.remove());
+
+            const clickX = e.pageX - this.screen.offsetLeft;
+            const clickY = e.pageY - this.screen.offsetTop;
+
+            const elementOnMouse = document.elementFromPoint(e.clientX, e.clientY);
+        
+            
+            if(!(elementOnMouse.id === 'screen')){
+                return;
+            }
+            
+            //노트 미리보기
+            const preview = document.createElement('div');
+            preview.className = "preview";
+            preview.style = `
+                left:${clickX - NOTE_SIZE[this.selectNoteType] / 2}px;
+                top:${clickY - NOTE_SIZE[this.selectNoteType] / 2}px;
+                width: ${NOTE_SIZE[this.selectNoteType]}px; /* 초기 크기 */
+                height: ${NOTE_SIZE[this.selectNoteType]}px; /* 초기 크기 */
+                position: absolute;
+                transform: rotate(45deg);
+                border: 1px solid black;
+            `;
+  
+            this.screen.appendChild(preview);
         });
 
         this.detailNoteTypeElement.addEventListener("change",(e)=>{
@@ -134,30 +165,12 @@ class Song{
     addNote(type,x, y){
         const id = this.noteIdx++;
 
-        const noteRange = type === NOTE_TYPE.long ? +document.querySelector("#longNoteInput").value : 0;
+        const noteRange = type === NOTE_TYPE.long ? +this.longNoteRangeElement.value : 0;
         this.pattern.push(new Note(id,type,this.sound.seek(), `${x}.${y}`,this.pattern.length, false, this.sound.seek() + noteRange, false));
         
         console.log(this.pattern);
 
-        //요약
-        const summaryNote = document.createElement('div');
-        summaryNote.className = `summaryNote sid-${id}`;
-        summaryNote.style = `
-            left: ${this.sound.seek() * 50 - 50/2}px;
-            width: ${noteRange * 50 + 50/2}px;
-            background-color: ${type === NOTE_TYPE.long ? '#87ceeb' : type === NOTE_TYPE.slide ? 'orange' : 'white'};
-            
-        `;
-        const startTimeEle = document.createElement('span');
-        startTimeEle.style = `font-size : 10px; height:10px`
-        startTimeEle.innerText = this.sound.seek().toFixed(2);
-        const endTimeEle = document.createElement('span');
-        endTimeEle.style = `font-size : 10px; height:10px; margin-left: auto;`;
-        endTimeEle.innerText = (this.sound.seek() + noteRange).toFixed(2);
-
-        summaryNote.appendChild(startTimeEle);
-        summaryNote.appendChild(endTimeEle);
-        this.summaryScreenElement.appendChild(summaryNote);
+        this.summaryRefresh();
         
     }
     deleteNote(){
@@ -178,9 +191,7 @@ class Song{
         document.querySelector("#detailEndTime").value = getFormatTime(0);
 
 
-        //요약
-        const deleteSummaryNote = document.querySelector(`summaryNote, sid-${this.selectNoteId}`);
-        deleteSummaryNote.remove();
+        this.summaryRefresh();
     }
 
 
@@ -272,7 +283,9 @@ class Song{
                     }
                 })  
             }
-        })
+        });
+
+        this.summaryRefresh();
     }
 
     editNoteTime(e){
@@ -290,7 +303,9 @@ class Song{
                 note.time = getTimeFromFormatTime(e.target.value);         
                 
             }
-        })
+        });
+
+        this.summaryRefresh();
 
         
     }
@@ -309,7 +324,66 @@ class Song{
 
                 note.endTime = getTimeFromFormatTime(e.target.value);   
             }
-        })
+        });
+
+        this.summaryRefresh();  
+    }
+
+  
+    summaryRefresh(){
+        //이전 노트 제거
+        const prevSummaryNotes = document.querySelectorAll(".summaryNote");
+        prevSummaryNotes.forEach(note => note.remove());
+
+        //정렬
+        this.pattern.sort((a,b) => a.time - b.time);
+        //모든 노트 생성
+        this.pattern.forEach(({id, type, time, endTime}) => {
+            const noteRange = type === NOTE_TYPE.long ? endTime - time : 0;
+
+            const summaryNote = document.createElement('div');
+            summaryNote.className = `summaryNote sid-${id}`;
+            //50/2 = 0.5초
+            summaryNote.style = `
+                left: ${time * 50 - 50/2}px;
+                width: ${noteRange * 50 + 50/2}px;
+                background-color: ${type === NOTE_TYPE.long ? '#87ceeb' : type === NOTE_TYPE.slide ? 'orange' : 'white'};
+                
+            `;
+            //시작, 끝 시간 표시
+            const startTimeEle = document.createElement('span');
+            startTimeEle.style = `font-size : 10px; height:10px`
+            startTimeEle.innerText = time.toFixed(2);
+            const endTimeEle = document.createElement('span');
+            endTimeEle.style = `font-size : 10px; height:10px; margin-left: auto;`;
+            endTimeEle.innerText = (time + noteRange).toFixed(2);
+
+            //롱노트 치는 타이밍
+            if(type === NOTE_TYPE.long){
+                const border = document.createElement('div');
+                border.className = "summaryLong";
+                summaryNote.append(border);
+            }
+
+            //클릭이벤트
+            summaryNote.addEventListener("click",(e)=>{
+                e.target.classList.forEach(className => {
+                    if(className.startsWith('sid-')){
+                        const findId = className.split('sid-')[1];
+                        this.setNoteDetail(findId);
+
+                        const findNote = document.querySelector(`id-${findId}`);
+                        this.clickedNoteElement = findNote;
+                    }
+                })
+                
+            });
+
+            summaryNote.appendChild(startTimeEle);
+            summaryNote.appendChild(endTimeEle);
+            this.summaryScreenElement.appendChild(summaryNote);
+        });
+
     }
 
     //new Note("slideNote", "11.2", "(1000,700,0)", "12", "false", "")
@@ -339,11 +413,15 @@ class Song{
         this.playbackRangeElement.value = this.sound.seek() * 100;
         this.changeTimeElement();
         
+
         
+        
+
 
         this.pattern.forEach((note, index) =>{
 
             // console.log(this.sound.seek() ,note.time);
+            
             
 
             //노트 표시
@@ -386,6 +464,9 @@ class Song{
                     z-index: -1;
                 `;
 
+
+                
+
                 setTimeout(() => {
                     // const element = document.querySelector(".noteBorder");
                     borderDiv.classList.add("loaded");
@@ -405,6 +486,7 @@ class Song{
                 deleteNote?.remove();
             }
         });
+
     }
 }
 
