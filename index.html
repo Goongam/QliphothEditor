@@ -44,6 +44,7 @@
     </div>
     <div style="width: 100%; max-width: 1920px">
       <button class="optionBtn" onclick="newSong();">노래 초기화</button>
+      <input type="file" onChange="addsong(this);" />노래읽어오기
       <button class="optionBtn" onclick="song.start();">노래 재생</button>
       <button class="optionBtn" onclick="song.pause();">노래 일시 정지</button>
       <button class="optionBtn" onclick="song.duration()">현재 재생 초</button>
@@ -156,7 +157,9 @@
       <div id="summarySongTime">
         <!-- <div class="timeUnit">0</div> -->
       </div>
-      <div id="summaryScreen"></div>
+      <div id="summaryScreen">
+        <div id="summaryTimeLine"></div>
+      </div>
     </div>
   </body>
 
@@ -166,6 +169,12 @@
       font-size: 30px;
     }
 
+    #summaryTimeLine {
+      position: absolute;
+      height: 100%;
+      border-right: 1px solid black;
+      width: 400px;
+    }
     #summary {
       overflow-y: scroll;
       width: 100%;

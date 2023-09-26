@@ -76,7 +76,7 @@ class Song{
         //요약
         this.summarySongTimeElement = document.querySelector("#summarySongTime");
         this.summaryScreenElement = document.querySelector("#summaryScreen");
-
+        this.summaryTimeLineElement = document.querySelector("#summaryTimeLine");
 
         this.clickedNoteElement = undefined;
 
@@ -412,17 +412,10 @@ class Song{
         //시간, 바 표시
         this.playbackRangeElement.value = this.sound.seek() * 100;
         this.changeTimeElement();
-        
 
-        
-        
-
-
+        //TODO: summary 재생바
+        this.summaryTimeLineElement.style.width = `${this.sound.seek() * 50}px`;
         this.pattern.forEach((note, index) =>{
-
-            // console.log(this.sound.seek() ,note.time);
-            
-            
 
             //노트 표시
             if(this.sound.seek() <= note.endTime && this.sound.seek() > note.time - 0.5){
@@ -546,4 +539,43 @@ function newSong(){
     });
     song = new Song();
     song.init(sound);
+}
+
+function addsong(event) {
+    console.log(event.files);
+    
+    // Read the file from the input
+    if (event.files.length > 0) {
+
+        const file = event.files[0];
+        const reader = new FileReader();
+  
+        reader.addEventListener('load', () => {
+      
+            const data = reader.result;
+   
+            // Create a Howler sound
+            const sound = new Howl({
+              src: [data],
+              format: file.name.split('.').pop().toLowerCase(), // always give file extension: this is optional but helps
+              onload: ()=>{
+                const playback = document.querySelector("#playback");
+    
+                //재생바
+                playback.max = sound.duration() * 100;
+                document.querySelector("#endTime").innerHTML = getFormatTime(sound.duration());
+    
+                summaryInit(sound);
+                }
+            });
+
+            song = new Song();
+            song.init(sound);
+            
+            console.log(song);
+            
+            
+        });
+        reader.readAsDataURL(file);
+    }
 }
