@@ -33,6 +33,7 @@ const NOTE_EXPORT_NAME = {
     slide:"slideNote",
 }
 
+const SMRY_WIDTH_PER_SEC = 50;
 
 
 //"노트의 종류", "노트가 생기는 시각", "노트가 생길 좌표", "노트 순서", "동타 여부", "롱노트 일때 지속시간"
@@ -74,6 +75,7 @@ class Song{
         this.detailNoteTimeElement = document.querySelector("#detailTime");
         this.detailEndTimeElement = document.querySelector("#detailEndTime");
         //요약
+        this.summaryElement = document.querySelector("#summary");
         this.summarySongTimeElement = document.querySelector("#summarySongTime");
         this.summaryScreenElement = document.querySelector("#summaryScreen");
         this.summaryTimeLineElement = document.querySelector("#summaryTimeLine");
@@ -90,29 +92,32 @@ class Song{
             this.frame();
         },100);
 
-        this.screen.addEventListener('click',(event)=>{
+        //노트생성 or 노트 선택
+        this.screen.addEventListener('mousedown',(event)=>{
+            console.log(event);
+            
             const clickX = event.pageX - this.screen.offsetLeft;
             const clickY = event.pageY - this.screen.offsetTop;
             
             const elementClicked = document.elementFromPoint(event.clientX, event.clientY);
         
-            console.log(elementClicked);
-            
             //다른 노트와 겹치는 경우
             if (elementClicked && elementClicked.classList.contains('note')) {
                 elementClicked.classList.forEach(className => {
                     if(className.startsWith('id')){
                         this.setNoteDetail(className.split('id-')[1]);
                         this.clickedNoteElement  = elementClicked;
+                        
                     }
                 })
                 
             } else { //다른 노트와 겹치지 않는 경우
                 this.addNote(this.selectNoteType,clickX,clickY);
-                console.log('클릭한 위치에 note 클래스를 가진 요소가 없습니다.');
+                
             }        
         });
 
+        //미리보기
         this.screen.addEventListener("mousemove",(e)=>{
 
             const prevPreviews = document.querySelectorAll('.preview');
@@ -145,18 +150,26 @@ class Song{
             this.screen.appendChild(preview);
         });
 
+        //노트타입변경
         this.detailNoteTypeElement.addEventListener("change",(e)=>{
             this.editNoteType(e);
         })
-
+        //노트시간변경
         this.detailNoteTimeElement.addEventListener("change", (e)=>{
             this.editNoteTime(e);
             
         })
-
+        //노트끝나는시간변경(롱)
         this.detailEndTimeElement.addEventListener("change", (e)=>{
             this.editNoteEndTime(e);
         })
+
+        this.summarySongTimeElement.addEventListener("click",(e)=>{
+            const clickX = e.pageX - this.summaryElement.offsetLeft;
+            
+            sound.seek(clickX / SMRY_WIDTH_PER_SEC);
+            
+        });
     }
 
 
@@ -168,8 +181,6 @@ class Song{
         const noteRange = type === NOTE_TYPE.long ? +this.longNoteRangeElement.value : 0;
         this.pattern.push(new Note(id,type,this.sound.seek(), `${x}.${y}`,this.pattern.length, false, this.sound.seek() + noteRange, false));
         
-        console.log(this.pattern);
-
         this.summaryRefresh();
         
     }
@@ -203,8 +214,28 @@ class Song{
         this.sound.pause();
     }
 
+    onplay(){
+        const playbtn = document.querySelector('#playbtn');
+        console.log(playbtn);
+        
+        if(this.sound.playing()){
+            this.pause();
+            playbtn.innerText = "▶️"
+        }else{
+            this.start();
+            playbtn.innerText = "⏸︎"
+        }
+    }
+
     duration() {
         console.log(this.sound.seek());
+    }
+
+    changeSelectNoteTime(){
+       const notetime =  document.querySelector("#detailTime").value;
+       const time = getTimeFromFormatTime(notetime);
+       this.sound.seek(time);
+    
     }
     
     changeTime(ele) {
@@ -245,22 +276,31 @@ class Song{
     setNoteDetail(noteId){ 
         this.pattern.forEach((note)=>{
            if( note.id == +noteId){
-            console.log("클릭한 노트:",note);
+                console.log("클릭한 노트:",note);
 
-            this.selectNoteId = note.id;
+                this.selectNoteId = note.id;
 
-            document.querySelectorAll(".inactive").forEach((ele) => {
-                ele.className = 'active';
-            })
+                document.querySelectorAll(".inactive").forEach((ele) => {
+                    ele.className = 'active';
+                })
 
-            document.querySelector("#detailID").innerText = note.id;
-            document.querySelector("#detailType").value = note.type;
-            document.querySelector("#detailTime").value = getFormatTime(note.time);
-            // console.log(note.endTime);
-            
-            document.querySelector("#detailEndTime").value = getFormatTime(note.endTime);
-            
-           }
+                document.querySelector("#detailID").innerText = note.id;
+                document.querySelector("#detailType").value = note.type;
+                document.querySelector("#detailTime").value = getFormatTime(note.time);
+                // console.log(note.endTime);
+                
+                document.querySelector("#detailEndTime").value = getFormatTime(note.endTime);
+                
+                //노트 하이라이트
+                    //기존 하이라이트 노트 class제거
+                document.querySelectorAll('.highlight').forEach(h => h.classList.remove('highlight'));
+                    //노트 하이라이트
+                const selectnote = document.querySelector(`.id-${note.id}`);
+                selectnote.classList.add('highlight');
+                    //요약 하이라이트
+                const selectSummaryNote = document.querySelector(`.sid-${note.id}`);
+                selectSummaryNote.classList.add('highlight');
+            }
         });
 
     }
@@ -345,16 +385,18 @@ class Song{
             summaryNote.className = `summaryNote sid-${id}`;
             //50/2 = 0.5초
             summaryNote.style = `
-                left: ${time * 50 - 50/2}px;
-                width: ${noteRange * 50 + 50/2}px;
+                left: ${time * SMRY_WIDTH_PER_SEC - SMRY_WIDTH_PER_SEC/2}px;
+                width: ${noteRange * SMRY_WIDTH_PER_SEC + SMRY_WIDTH_PER_SEC/2}px;
                 background-color: ${type === NOTE_TYPE.long ? '#87ceeb' : type === NOTE_TYPE.slide ? 'orange' : 'white'};
                 
             `;
             //시작, 끝 시간 표시
             const startTimeEle = document.createElement('span');
+            startTimeEle.className = `sid-${id}`;
             startTimeEle.style = `font-size : 10px; height:10px`
             startTimeEle.innerText = time.toFixed(2);
             const endTimeEle = document.createElement('span');
+            endTimeEle.className = `sid-${id}`;
             endTimeEle.style = `font-size : 10px; height:10px; margin-left: auto;`;
             endTimeEle.innerText = (time + noteRange).toFixed(2);
 
@@ -413,8 +455,10 @@ class Song{
         this.playbackRangeElement.value = this.sound.seek() * 100;
         this.changeTimeElement();
 
-        //TODO: summary 재생바
-        this.summaryTimeLineElement.style.width = `${this.sound.seek() * 50}px`;
+        
+        this.summaryTimeLineElement.style.left = `${this.sound.seek() * SMRY_WIDTH_PER_SEC}px`;
+        //재생바 높이 = 노트 길이, 패딩, 보더(50, 5, 2) * 노트개수 + 상단시간바
+        this.summaryTimeLineElement.style.height = `${this.pattern.length * (5 + 2 + SMRY_WIDTH_PER_SEC) + 20}px`
         this.pattern.forEach((note, index) =>{
 
             //노트 표시
