@@ -94,8 +94,6 @@ class Song{
 
         //노트생성 or 노트 선택
         this.screen.addEventListener('mousedown',(event)=>{
-            console.log(event);
-            
             const clickX = event.pageX - this.screen.offsetLeft;
             const clickY = event.pageY - this.screen.offsetTop;
             
@@ -442,7 +440,13 @@ class Song{
             return copyNote;
         });
 
-        const result = samePtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(2)}","(${ note.pos.split('.')[0]},${ 1080 - note.pos.split('.')[1]},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
+        const clickX = note.pos.split('.')[0];
+        const clickY = note.pos.split('.')[1];
+
+        const x = clickX - 960;
+        const y = 1080 - clickY - 540;
+
+        const result = samePtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(2)}","(${ x},${ y},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
         
         document.querySelector("#exportContent").innerText = result.join(',\n');
         openExportPanel();
