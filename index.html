@@ -116,6 +116,8 @@
       <div id="screen" style="position: relative">
         <div class="interface interface-top"></div>
         <div class="interface interface-bottom"></div>
+        <div class="border-hori"></div>
+        <div class="border-verti"></div>
       </div>
       <div id="noteDetail" class="inactive">
         <div>
@@ -177,15 +179,22 @@
   </body>
 
   <script>
-    // const screen = document.querySelector("#screen");
+    const screen = document.querySelector("#screen");
 
-    // screen.addEventListener("mousedown", (event) => {
-    //   const clickX = event.pageX - screen.offsetLeft;
-    //   const clickY = event.pageY - screen.offsetTop;
+    screen.addEventListener("mousedown", (event) => {
+      const clickX = event.pageX - screen.offsetLeft;
+      const clickY = event.pageY - screen.offsetTop;
 
-    //   console.log(clickX - 960);
-    //   console.log(1080 - clickY - 540);
-    // });
+      const elementClicked = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      );
+
+      console.log(elementClicked);
+
+      console.log(clickX - 960);
+      console.log(1080 - clickY - 540);
+    });
   </script>
   <style>
     * {
@@ -354,6 +363,24 @@
 
     .interface-bottom {
       bottom: 100px;
+    }
+
+    .border-hori {
+      position: absolute;
+      border-right: 1px dashed rgba(0, 0, 0, 0.173);
+      width: 0px;
+      height: 100%;
+      left: 960px;
+      pointer-events: none;
+    }
+
+    .border-verti {
+      position: absolute;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.173);
+      width: 100%;
+      height: 0px;
+      top: 540px;
+      pointer-events: none;
     }
 
     .optionBtn {
