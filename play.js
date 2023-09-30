@@ -190,8 +190,6 @@ class Song{
         
         this.summaryRefresh();
         
-        console.log(this.pattern);
-        
     }
     deleteNote(){
         this.pattern = this.pattern.filter(note => note.id != this.selectNoteId);
@@ -225,8 +223,7 @@ class Song{
 
     onplay(){
         const playbtn = document.querySelector('#playbtn');
-        console.log(playbtn);
-        
+
         if(this.sound.playing()){
             this.pause();
             playbtn.innerText = "▶️"
@@ -234,10 +231,6 @@ class Song{
             this.start();
             playbtn.innerHTML = '<img src="https://cdn.icon-icons.com/icons2/1144/PNG/512/pausebutton_80847.png" width="30px" />'
         }
-    }
-
-    duration() {
-        console.log(this.sound.seek());
     }
 
     changeSelectNoteTime(){
@@ -285,8 +278,7 @@ class Song{
     setNoteDetail(noteId){ 
         this.pattern.forEach((note)=>{
            if( note.id == +noteId){
-                console.log("클릭한 노트:",note);
-
+  
                 this.selectNoteId = note.id;
 
                 document.querySelectorAll(".inactive").forEach((ele) => {
@@ -296,8 +288,7 @@ class Song{
                 document.querySelector("#detailID").innerText = note.id;
                 document.querySelector("#detailType").value = note.type;
                 document.querySelector("#detailTime").value = getFormatTime(note.time);
-                // console.log(note.endTime);
-                
+  
                 document.querySelector("#detailEndTime").value = getFormatTime(note.endTime);
                 
                 //노트 하이라이트
@@ -364,9 +355,7 @@ class Song{
         this.pattern.map((note) => {
             if(note.id === this.selectNoteId){
                 //시작 시간이 보다 작으면 return, 롱노트가 아니면 return
-                if(note.time > getTimeFromFormatTime(e.target.value) || note.type !== NOTE_TYPE.long){
-                    console.log('return!');
-                    
+                if(note.time > getTimeFromFormatTime(e.target.value) || note.type !== NOTE_TYPE.long){    
                     return;
                 }
                 //끝나는 시간 수정
@@ -473,8 +462,12 @@ class Song{
     }
 
     import(){
-        openImportPanel();
-        
+        let a = true;
+        if(this.pattern.length >= 1){//찍고있는 패턴이 존재하는경우
+            a = confirm('주의: 현재 작업이 초기화 됩니다. 계속하시겠습니까?');
+        }
+
+        if(a) openImportPanel();
     }
 
     doImport(){
@@ -540,7 +533,6 @@ class Song{
                 const div =document.querySelector(`.id-${note.id}`);
     
                 if(div){
-                    // console.log('이미 존재하는 노트');
                     return;
                 }
 
@@ -630,8 +622,6 @@ function openImportPanel(){
     
     document.querySelector("#importPanel").style.display = "flex";
 
-    console.log(document.querySelector("#importPanel"));
-    
 }
 
 function summaryInit(sound){
@@ -654,10 +644,18 @@ function summaryInit(sound){
     }
 }
 
+function displayOption(){
+
+    const options = document.querySelectorAll('.option');
+   
+    options.forEach(optionEle => optionEle.style.display = 'flex');
+}
+
 function newSong(){
     const sound = new Howl({
         src: ["./test.mp3"],
         onload: ()=>{
+   
             const playback = document.querySelector("#playback");
 
             //재생바
@@ -665,6 +663,8 @@ function newSong(){
             document.querySelector("#endTime").innerHTML = getFormatTime(sound.duration());
 
             summaryInit(sound);
+
+            
         }
     });
     song = new Song();
@@ -672,8 +672,7 @@ function newSong(){
 }
 
 function addsong(event) {
-    console.log(event.files);
-    
+
     // Read the file from the input
     if (event.files.length > 0) {
 
@@ -696,16 +695,24 @@ function addsong(event) {
                 document.querySelector("#endTime").innerHTML = getFormatTime(sound.duration());
     
                 summaryInit(sound);
+                displayOption();
                 }
             });
 
             song = new Song();
             song.init(sound);
             
-            console.log(song);
-            
+  
             
         });
         reader.readAsDataURL(file);
+
+        //뒤롤가기
+        history.pushState(null, null, location.href); 
+        window.onpopstate = function(event) { 
+          const cf = confirm('현재 작업이 저장되지 않습니다. 뒤로가시겠습니까?') 
+            if(cf) history.back();
+            else history.go(1);
+        };
     }
 }
