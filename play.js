@@ -33,6 +33,15 @@ const NOTE_EXPORT_NAME = {
     slide:"slideNote",
 }
 
+const NOTE_IMPORT_NAME = {
+    smallNormalNote : "normal1",
+    normalNote: "normal2",
+    bigNormalNote:"normal3",
+    longNote:"long",
+    slideNote:"slide",
+}
+
+
 const SMRY_WIDTH_PER_SEC = 50;
 
 
@@ -181,6 +190,8 @@ class Song{
         
         this.summaryRefresh();
         
+        console.log(this.pattern);
+        
     }
     deleteNote(){
         this.pattern = this.pattern.filter(note => note.id != this.selectNoteId);
@@ -221,7 +232,7 @@ class Song{
             playbtn.innerText = "▶️"
         }else{
             this.start();
-            playbtn.innerText = "⏸︎"
+            playbtn.innerHTML = '<img src="https://cdn.icon-icons.com/icons2/1144/PNG/512/pausebutton_80847.png" width="30px" />'
         }
     }
 
@@ -429,6 +440,9 @@ class Song{
     //new Note("slideNote", "11.2", "(1000,700,0)", "12", "false", "")
     export(){
         const ptn =this.pattern.sort((a,b) => a.time - b.time);
+        
+
+        //동치 계산
         const samePtn = ptn.map((note,idx) => {
             const copyNote = {...note};
 
@@ -440,17 +454,73 @@ class Song{
             return copyNote;
         });
 
-        const clickX = note.pos.split('.')[0];
-        const clickY = note.pos.split('.')[1];
 
-        const x = clickX - 960;
-        const y = 1080 - clickY - 540;
+        //pos계산 (중앙 0,0)
+        const posCalcPtn = samePtn.map((note) => {
+            const clickX = note.pos.split('.')[0];
+            const clickY = note.pos.split('.')[1];
+    
+            const x = clickX - 960;
+            const y = 1080 - clickY - 540;
 
-        const result = samePtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(2)}","(${ x},${ y},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
+            return {...note, x,y};
+        });
+
+        const result = posCalcPtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(2)}","(${note.x},${note.y},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
         
         document.querySelector("#exportContent").innerText = result.join(',\n');
-        openExportPanel();
-        console.log(result.join(',\n'));
+        openExportPanel();   
+    }
+
+    import(){
+        openImportPanel();
+        
+    }
+
+    doImport(){
+        try{
+            const importValue = document.querySelector('#importContent').value;
+
+            const lines = importValue.trim().split('\n');
+            const splitLines = lines.map((line) => line.split('new Note(')[1].split(','));
+            
+            this.pattern = [];
+
+            splitLines.map((splitLine, i) => {
+                const [type, time, posX, posY, posZ, seq, isSame, longTime] = splitLine;
+                
+                //new Note(id,type,this.sound.seek(), `${x}.${y}`,this.pattern.length, false, this.sound.seek() + noteRange, false));
+
+                const startTime = +time.slice(1,-1);
+                // const x = clickX - 960;
+                // const y = 1080 - clickY - 540;
+                
+                const x = +posX.slice(2) + 960;
+                const y = 1080-(+posY + 540);
+                const endTime = startTime + +longTime.slice(1,-2);
+
+                this.pattern.push(
+                    new Note(
+                        i, 
+                        NOTE_IMPORT_NAME[type.slice(1,-1)],
+                        startTime,
+                        `${x}.${y}`,
+                        i,
+                        false,
+                        endTime,
+                        false
+                    )
+                );
+                
+            });
+            this.noteIdx = this.pattern.length;
+            this.summaryRefresh();
+
+        }catch(e){
+            alert('잘못된 형식입니다');
+        }
+        
+        
         
     }
 
@@ -550,6 +620,18 @@ function closeExportPanel() {
 
 function openExportPanel(){
     document.querySelector("#exportPanel").style.display = "flex";
+}
+
+function closeImportPanel() {
+    document.querySelector("#importPanel").style.display = "none";
+  }
+
+function openImportPanel(){
+    
+    document.querySelector("#importPanel").style.display = "flex";
+
+    console.log(document.querySelector("#importPanel"));
+    
 }
 
 function summaryInit(sound){
