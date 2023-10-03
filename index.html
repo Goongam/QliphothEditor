@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./range.css" type="text/css" />
   </head>
   <body style="display: flex; flex-direction: column; align-items: center">
+    <!-- export -->
     <div
       style="
         position: absolute;
@@ -42,7 +43,7 @@
         id="exportContent"
       ></div>
     </div>
-
+    <!-- import -->
     <div
       style="
         position: absolute;
@@ -79,6 +80,58 @@
 new Note("smallNormalNote","2.01","(-540,-960,0)","2","false","0.0"),
 new Note("smallNormalNote","2.01","(540,960,0)","2","false","0.0")'
       ></textarea>
+    </div>
+
+    <!-- 도움말 -->
+    <div
+      style="
+        position: absolute;
+        display: none;
+        flex-direction: column;
+        max-width: 1000px;
+        width: 100%;
+        max-height: 2000px;
+        background-color: white;
+        border: 1px solid black;
+        padding: 10px;
+        z-index: 100;
+      "
+      id="helpPanel"
+    >
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: start;
+          border-bottom: black;
+        "
+      >
+        <div style="height: 50px">사용법</div>
+        <button style="width: 50px; height: 50px" onclick="closeHelp()">
+          X
+        </button>
+      </div>
+      <p>1. 파일선택으로 [mp3, webm, wav...] 파일 선택</p>
+      <p>2. 일반1, 일반2, 일반3, 슬라이드, 롱 버튼을 클릭해 노트 타입 변경</p>
+      <p>3. x0.1 ~ x2.0까지 배속 변경</p>
+      <p>4. ▶버튼으로 노래를 재생, 정지</p>
+      <p>5. 화면을 클릭하여 해당 시간에 노트를 추가</p>
+      <p>6. 화면에 추가된 노트를 다시 클릭하여 타입 및 시간 변경과 노트 삭제</p>
+      <p>
+        7. 스크린 및 내가 추가한 노트를 요약적으로 확인 가능 / 시간바를 클릭하여
+        재생위치 변경
+      </p>
+      <p>8.코드로 추출하기 버튼을 클릭하여 Unity에서 사용할 코드로 변환</p>
+      <p>
+        9. 코드에서 불러오기 버튼을 클릭하여 변환한 코드를 다시 에디터에
+        불러오기
+      </p>
+      <p>[단축키]</p>
+      <div>A: 0.5초 전으로</div>
+      <div>D: 0.5초 뒤로</div>
+      <div>S: 일시정지/재생</div>
+      <div>DELETE: 현재 선택한 노트 삭제</div>
+      <div>Q,W,E,R,T: 일반1노트 ~ 롱노트 까지 노트 타입 변경</div>
     </div>
 
     <div
@@ -126,6 +179,13 @@ new Note("smallNormalNote","2.01","(540,960,0)","2","false","0.0")'
           >
             코드에서 불러오기
           </button>
+          <button
+            class="optionBtn"
+            style="background-color: white; width: 100px"
+            onclick="showHelp()"
+          >
+            도움말
+          </button>
         </div>
       </div>
       <div
@@ -145,44 +205,64 @@ new Note("smallNormalNote","2.01","(540,960,0)","2","false","0.0")'
         />
         <span id="endTime" class="time">00:00:0</span>
       </div>
-      <div id="noteType" class="option">
-        <button
-          class="optionBtn noteTypeBtn"
-          onclick="song.changeNoteType(NOTE_TYPE.normal1, this)"
-          style="background-color: yellow"
-        >
-          일반1
-        </button>
-        <button
-          class="optionBtn noteTypeBtn"
-          onclick="song.changeNoteType(NOTE_TYPE.normal2, this)"
-          style="background-color: white"
-        >
-          일반2
-        </button>
-        <button
-          class="optionBtn noteTypeBtn"
-          onclick="song.changeNoteType(NOTE_TYPE.normal3, this)"
-          style="background-color: white"
-        >
-          일반3
-        </button>
+      <div
+        class="option"
+        style="display: flex; justify-content: space-between; width: 2100px"
+      >
+        <div id="noteType" class="option">
+          <button
+            id="type-normal1-btn"
+            class="optionBtn noteTypeBtn"
+            onclick="song.changeNoteType(NOTE_TYPE.normal1, this)"
+            style="background-color: yellow"
+          >
+            일반1
+          </button>
+          <button
+            id="type-normal2-btn"
+            class="optionBtn noteTypeBtn"
+            onclick="song.changeNoteType(NOTE_TYPE.normal2, this)"
+            style="background-color: white"
+          >
+            일반2
+          </button>
+          <button
+            id="type-normal3-btn"
+            class="optionBtn noteTypeBtn"
+            onclick="song.changeNoteType(NOTE_TYPE.normal3, this)"
+            style="background-color: white"
+          >
+            일반3
+          </button>
 
-        <button
-          class="optionBtn noteTypeBtn"
-          onclick="song.changeNoteType(NOTE_TYPE.slide, this)"
-          style="background-color: white"
-        >
-          슬라이드
-        </button>
-        <button
-          class="optionBtn noteTypeBtn"
-          onclick="song.changeNoteType(NOTE_TYPE.long, this)"
-          style="background-color: white"
-        >
-          롱
-        </button>
-        <input id="longNoteInput" type="number" disabled value="2" /> 초
+          <button
+            id="type-slide-btn"
+            class="optionBtn noteTypeBtn"
+            onclick="song.changeNoteType(NOTE_TYPE.slide, this)"
+            style="background-color: white"
+          >
+            슬라이드
+          </button>
+          <button
+            id="type-long-btn"
+            class="optionBtn noteTypeBtn"
+            onclick="song.changeNoteType(NOTE_TYPE.long, this)"
+            style="background-color: white"
+          >
+            롱
+          </button>
+          <input id="longNoteInput" type="number" disabled value="2" /> 초
+        </div>
+
+        <select id="rate" class="option" onchange="song.changeRate(this)">
+          <option value="0.1">x0.1</option>
+          <option value="0.25">x0.25</option>
+          <option value="0.5">x0.5</option>
+          <option value="0.75">x0.75</option>
+          <option value="1.0" selected>x1.0</option>
+          <option value="1.5">x1.5</option>
+          <option value="2.0">x2.0</option>
+        </select>
       </div>
     </div>
     <div style="display: flex; margin-top: 10px">
@@ -249,11 +329,17 @@ new Note("smallNormalNote","2.01","(540,960,0)","2","false","0.0")'
       <div id="summaryScreen"></div>
       <div id="summaryTimeLine"></div>
     </div>
-
-    <button id="stop">뒤로가기 막기</button>
   </body>
 
-  <script></script>
+  <script>
+    function showHelp() {
+      document.querySelector("#helpPanel").style.display = "flex";
+    }
+
+    function closeHelp() {
+      document.querySelector("#helpPanel").style.display = "none";
+    }
+  </script>
   <style>
     * {
       font-size: 30px;
@@ -510,9 +596,6 @@ new Note("smallNormalNote","2.01","(540,960,0)","2","false","0.0")'
 
     .option {
       display: none;
-    }
-
-    #songInput {
     }
 
     input[type="file"]::file-selector-button {
