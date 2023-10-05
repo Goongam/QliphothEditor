@@ -139,8 +139,7 @@ class Song{
 
     summarySongTimeClickEvent = (e)=>{
         const clickX = e.offsetX;
-        console.log(e.offsetX);
-        
+
         this.sound.seek(clickX / SMRY_WIDTH_PER_SEC);     
     }
 
@@ -159,8 +158,7 @@ class Song{
 
     keydownEvenet = (e) => {
         const key = e.key.toUpperCase();
-        console.log(key);
-        
+
         switch(key){
             case 'A':
                 this.sound.seek(this.sound.seek() - 0.5)
@@ -188,6 +186,22 @@ class Song{
                 break;
             case 'T':
                 this.changeNoteType(NOTE_TYPE.long, document.querySelector('#type-long-btn'));
+                break;
+            case 'ARROWRIGHT':
+                if(this.selectNoteId != undefined) e.preventDefault();
+                this.editNotePos(1, 0);
+                break;
+            case 'ARROWLEFT':
+                if(this.selectNoteId != undefined) e.preventDefault();
+                this.editNotePos(-1, 0);
+                break;
+            case 'ARROWUP':
+                if(this.selectNoteId != undefined) e.preventDefault();
+                this.editNotePos(0, -1);
+                break;
+            case 'ARROWDOWN':
+                if(this.selectNoteId != undefined) e.preventDefault();
+                this.editNotePos(0, 1);
                 break;
 
         }
@@ -244,6 +258,9 @@ class Song{
 
         this.summarySongTimeElement.addEventListener("click", this.summarySongTimeClickEvent);
 
+        this.playbackRangeElement.addEventListener("click", ()=>{
+            this.unSelectNote();
+        });
 
         //키보드 단축키
         window.addEventListener('keydown',this.keydownEvenet)
@@ -272,6 +289,7 @@ class Song{
 
         this.summarySongTimeElement.removeEventListener("click", this.summarySongTimeClickEvent);
 
+        
         // this.summaryNote.removeEventListener("click", this.summaryNoteClickEvent);
         document.querySelectorAll(".summaryNote").forEach(e => e.removeEventListener("click", this.summaryNoteClickEvent));
     }
@@ -293,6 +311,7 @@ class Song{
         const deleteNote= document.querySelector(`.id-${this.selectNoteId}`);
         deleteNote?.remove();
 
+        //함수화
         this.selectNoteId = undefined;
 
         document.querySelectorAll(".active").forEach((ele) => {
@@ -303,11 +322,30 @@ class Song{
         document.querySelector("#detailType").value = '';
         document.querySelector("#detailTime").value = getFormatTime(0);
         document.querySelector("#detailEndTime").value = getFormatTime(0);
-
+//
 
         this.summaryRefresh();
     }
 
+    unSelectNote(){
+        
+        if(!this.selectNoteId) return;
+
+        const selectedNote = document.querySelector(`.id-${this.selectNoteId}`);
+        
+        selectedNote.classList.remove('highlight');
+
+        document.querySelectorAll(".active").forEach((ele) => {
+            ele.className = 'inactive';
+        })
+
+        document.querySelector("#detailID").innerText = '-';
+        document.querySelector("#detailType").value = '';
+        document.querySelector("#detailTime").value = getFormatTime(0);
+        document.querySelector("#detailEndTime").value = getFormatTime(0);
+
+        this.selectNoteId = undefined;
+    }
 
     start(){
         this.sound.play();
@@ -381,6 +419,7 @@ class Song{
            if( note.id == +noteId){
   
                 this.selectNoteId = note.id;
+                
 
                 document.querySelectorAll(".inactive").forEach((ele) => {
                     ele.className = 'active';
@@ -468,6 +507,22 @@ class Song{
         this.summaryRefresh();  
     }
 
+    editNotePos(dirX, dirY){
+        this.pattern.map((note) => {
+            if(note.id === this.selectNoteId){
+                let [x, y] = note.pos.split('.');
+  
+                x = Math.min(Math.max(0, +x + dirX), 1920);
+                y = Math.min(Math.max(0, +y + dirY), 1080);
+                note.pos = `${x}.${y}`;
+               
+                
+                this.clickedNoteElement.style.left = `${x}px`;
+                this.clickedNoteElement.style.top = `${y}px`;
+            }
+
+        });
+    }
   
     summaryRefresh(){
         //이전 노트 제거
@@ -657,13 +712,10 @@ class Song{
                     z-index: -1;
                 `;
 
-
-                
-
                 setTimeout(() => {
-                    // const element = document.querySelector(".noteBorder");
                     borderDiv.classList.add("loaded");
-                }, 1);
+                    
+                }, 20);
 
                 setTimeout(() => {
                     borderDiv.remove();
