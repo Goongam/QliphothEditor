@@ -149,8 +149,9 @@ class Song{
                 const findId = className.split('sid-')[1];
                 this.setNoteDetail(findId);
 
-                const findNote = document.querySelector(`id-${findId}`);
+                const findNote = document.querySelector(`.id-${findId}`);
                 this.clickedNoteElement = findNote;
+                
             }
         })
         
@@ -188,11 +189,11 @@ class Song{
                 this.changeNoteType(NOTE_TYPE.long, document.querySelector('#type-long-btn'));
                 break;
             case 'ARROWRIGHT':
-                if(this.selectNoteId != undefined) e.preventDefault();
+                if(this.selectNoteId != undefined) e.preventDefault(); //클릭된 노트 존재시 스크롤 방지
                 this.editNotePos(1, 0);
                 break;
             case 'ARROWLEFT':
-                if(this.selectNoteId != undefined) e.preventDefault();
+                if(this.selectNoteId != undefined) e.preventDefault(); 
                 this.editNotePos(-1, 0);
                 break;
             case 'ARROWUP':
@@ -333,7 +334,7 @@ class Song{
 
         const selectedNote = document.querySelector(`.id-${this.selectNoteId}`);
         
-        selectedNote.classList.remove('highlight');
+        selectedNote?.classList.remove('highlight');
 
         document.querySelectorAll(".active").forEach((ele) => {
             ele.className = 'inactive';
@@ -345,6 +346,8 @@ class Song{
         document.querySelector("#detailEndTime").value = getFormatTime(0);
 
         this.selectNoteId = undefined;
+
+        this.summaryRefresh();
     }
 
     start(){
@@ -508,6 +511,7 @@ class Song{
     }
 
     editNotePos(dirX, dirY){
+  
         this.pattern.map((note) => {
             if(note.id === this.selectNoteId){
                 let [x, y] = note.pos.split('.');
@@ -536,13 +540,12 @@ class Song{
             const noteRange = type === NOTE_TYPE.long ? endTime - time : 0;
 
             const summaryNote = document.createElement('div');
-            summaryNote.className = `summaryNote sid-${id}`;
+            summaryNote.className = `summaryNote sid-${id} ${id === this.selectNoteId && "highlight"}`;
             //50/2 = 0.5초
             summaryNote.style = `
                 left: ${time * SMRY_WIDTH_PER_SEC - SMRY_WIDTH_PER_SEC/2}px;
                 width: ${noteRange * SMRY_WIDTH_PER_SEC + SMRY_WIDTH_PER_SEC/2}px;
                 background-color: ${type === NOTE_TYPE.long ? '#87ceeb' : type === NOTE_TYPE.slide ? 'orange' : 'white'};
-                
             `;
             //시작, 끝 시간 표시
             const startTimeEle = document.createElement('span');
@@ -684,7 +687,7 @@ class Song{
                 // note.isShow = true;
                 //노트생성
                 const diamondDiv = document.createElement('div');
-                diamondDiv.className = `note diamond id-${note.id} show type-${note.type}`;
+                diamondDiv.className = `note diamond id-${note.id} show type-${note.type} ${note.id === this.selectNoteId && "highlight"}`;
                 diamondDiv.style = `
                     // width: ${NOTE_SIZE[note.type]}px;
                     // height: ${NOTE_SIZE[note.type]}px;
