@@ -138,7 +138,8 @@ class Song{
     }
 
     summarySongTimeClickEvent = (e)=>{
-        const clickX = e.pageX - this.summaryElement.offsetLeft;
+        const clickX = e.offsetX;
+        console.log(e.offsetX);
         
         this.sound.seek(clickX / SMRY_WIDTH_PER_SEC);     
     }
@@ -803,12 +804,20 @@ function addsong(event) {
         });
         reader.readAsDataURL(file);
 
-        //뒤롤가기
+        //뒤롤가기 방지
         history.pushState(null, null, location.href); 
         window.onpopstate = function(event) { 
           const cf = confirm('현재 작업이 저장되지 않습니다. 뒤로가시겠습니까?') 
             if(cf) history.back();
             else history.go(1);
         };
+
+        //새로고침, 종료 방지
+        window.addEventListener('beforeunload', (event) => {
+            // 표준에 따라 기본 동작 방지
+            event.preventDefault();
+            // Chrome에서는 returnValue 설정이 필요함
+            event.returnValue = '';
+          });
     }
 }
