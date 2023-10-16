@@ -603,7 +603,7 @@ class Song{
             return {...note, x,y};
         });
 
-        const result = posCalcPtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(2)}","(${note.x},${note.y},0)","${idx+1}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
+        const result = posCalcPtn.map((note,idx) => `new Note("${NOTE_EXPORT_NAME[note.type]}","${note.time.toFixed(2)}","(${note.x},${note.y},0)","${idx}","${note.isSame}","${(note.endTime - note.time).toFixed(1)}")`)
         
         document.querySelector("#exportContent").innerText = result.join(',\n');
         openExportPanel();   
