@@ -117,6 +117,7 @@ new Note("smallNormalNote","2.01","(540,960,0)","2","false","0.0")'
       <p>4. ▶버튼으로 노래를 재생, 정지</p>
       <p>5. 화면을 클릭하여 해당 시간에 노트를 추가</p>
       <p>6. 화면에 추가된 노트를 다시 클릭하여 타입 및 시간 변경과 노트 삭제</p>
+      <p>6.1. 노트를 우클릭 드래그 하여 위치 변경</p>
       <p>
         7. 스크린 및 내가 추가한 노트를 요약적으로 확인 가능 / 시간바를 클릭하여
         재생위치 변경
@@ -380,7 +381,7 @@ new Note("smallNormalNote","2.01","(540,960,0)","2","false","0.0")'
       overflow-x: auto;
       background-color: green;
     }
-    .summaryLong {
+    .summaryTiming {
       position: absolute;
       width: 0px;
       left: 25px;
@@ -513,6 +514,8 @@ new Note("smallNormalNote","2.01","(540,960,0)","2","false","0.0")'
 
       width: 100%;
       border-bottom: 1px solid black;
+
+      pointer-events: none;
     }
 
     .interface-top {

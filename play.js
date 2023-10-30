@@ -68,8 +68,55 @@ class Song{
     showPattern = [];
     selectNoteType = NOTE_TYPE.normal1;
 
+
+    clickNoteEvent = (elementClicked)=>{
+        elementClicked.classList.forEach(className => {
+            if(className.startsWith('id')){
+                this.setNoteDetail(className.split('id-')[1]);
+                this.clickedNoteElement = elementClicked;
+                
+            }
+        })
+    }
+
+    clickMoveNoteEvent = (elementClicked)=>{
+        elementClicked.classList.forEach(className => {
+            if(className.startsWith('id')){
+                this.movingNoteId = +className.split('id-')[1];
+                this.movingNoteElement = elementClicked;
+
+                //포인터 이벤트삭제
+                elementClicked.style.pointerEvents = 'none';
+                // document.querySelector('body').style.pointerEvents = 'none'
+            }
+        })
+    }
+
+    screenMouseUpEvent = (event)=>{
+        const isRigthClick = event.button === 2;
+        if(!isRigthClick) return;
+
+        this.removeMovingNote();
+        
+    }
+
+    screenMouseLeaveEvent = (event) => {
+        this.removeMovingNote();
+    }
+
+    removeMovingNote = ()=>{
+        this.movingNoteElement.style.pointerEvents = 'auto';
+        this.movingNoteId = undefined;
+        this.movingNoteElement = undefined;
+    }
+
     //이벤트 리스너
     screenMouseDownEvent = (event)=>{
+        
+        const isRigthClick = event.button === 2;
+        console.log(isRigthClick);
+        
+        
         this.screen.classList.add('event');
 
         const clickX = event.pageX - this.screen.offsetLeft;
@@ -79,16 +126,10 @@ class Song{
     
         //다른 노트와 겹치는 경우
         if (elementClicked && elementClicked.classList.contains('note')) {
-            elementClicked.classList.forEach(className => {
-                if(className.startsWith('id')){
-                    this.setNoteDetail(className.split('id-')[1]);
-                    this.clickedNoteElement  = elementClicked;
-                    
-                }
-            })
-            
+            if(isRigthClick) this.clickMoveNoteEvent(elementClicked);
+            else this.clickNoteEvent(elementClicked);
         } else { //다른 노트와 겹치지 않는 경우
-            this.addNote(this.selectNoteType,clickX,clickY);
+            if(!isRigthClick) this.addNote(this.selectNoteType,clickX,clickY);
         }        
     }
 
@@ -119,9 +160,15 @@ class Song{
             position: absolute;
             transform: rotate(45deg);
             border: 1px solid black;
+            pointer-events: none;
         `;
 
         this.screen.appendChild(preview);
+
+        //노트 움직이기
+        if(this.movingNoteId !== undefined){   
+            this.editNotePos(this.movingNoteId, undefined,undefined, clickX, clickY);
+        }
     }
 
     detailTypeChangeEvent = (e)=>{
@@ -190,19 +237,19 @@ class Song{
                 break;
             case 'ARROWRIGHT':
                 if(this.selectNoteId != undefined) e.preventDefault(); //클릭된 노트 존재시 스크롤 방지
-                this.editNotePos(1, 0);
+                this.editNotePos(this.selectNoteId, 1, 0);
                 break;
             case 'ARROWLEFT':
                 if(this.selectNoteId != undefined) e.preventDefault(); 
-                this.editNotePos(-1, 0);
+                this.editNotePos(this.selectNoteId, -1, 0);
                 break;
             case 'ARROWUP':
                 if(this.selectNoteId != undefined) e.preventDefault();
-                this.editNotePos(0, -1);
+                this.editNotePos(this.selectNoteId, 0, -1);
                 break;
             case 'ARROWDOWN':
                 if(this.selectNoteId != undefined) e.preventDefault();
-                this.editNotePos(0, 1);
+                this.editNotePos(this.selectNoteId, 0, 1);
                 break;
 
         }
@@ -233,6 +280,8 @@ class Song{
         this.rateElement = document.querySelector('#rate').selectedIndex = 4
 
         this.clickedNoteElement = undefined;
+        this.movingNoteElement = undefined;
+        this.movingNoteId = undefined;
 
         this.noteIdx = 0;
 
@@ -246,10 +295,15 @@ class Song{
 
         this.screen.addEventListener('mousedown',this.screenMouseDownEvent);
 
-        //미리보기
+        //미리보기 및 노트 위치 변경
         this.screen.addEventListener("mousemove",this.screenMouseMoveEvent);
 
-        
+        //노트 움직이기 종료
+        this.screen.addEventListener("mouseup", this.screenMouseUpEvent);
+
+
+        this.screen.addEventListener("mouseleave", this.screenMouseLeaveEvent);
+
         //노트타입변경
         this.detailNoteTypeElement.addEventListener("change",this.detailTypeChangeEvent)
         //노트시간변경
@@ -510,19 +564,26 @@ class Song{
         this.summaryRefresh();  
     }
 
-    editNotePos(dirX, dirY){
-  
+    editNotePos(noteId, dirX, dirY, absoluteX, absoluteY){
+        
+        
         this.pattern.map((note) => {
-            if(note.id === this.selectNoteId){
-                let [x, y] = note.pos.split('.');
-  
-                x = Math.min(Math.max(0, +x + dirX), 1920);
-                y = Math.min(Math.max(0, +y + dirY), 1080);
-                note.pos = `${x}.${y}`;
-               
+            if(note.id === noteId){
+                console.log(absoluteX);
+                if(absoluteX || absoluteY){
+                    note.pos = `${absoluteX}.${absoluteY}`;
+                    this.movingNoteElement.style.left = `${absoluteX}px`;
+                    this.movingNoteElement.style.top = `${absoluteY}px`;
+                }else{
+                    let [x, y] = note.pos.split('.');
+                    x = Math.min(Math.max(0, +x + dirX), 1920);
+                    y = Math.min(Math.max(0, +y + dirY), 1080);
+                    note.pos = `${x}.${y}`;
+                    this.clickedNoteElement.style.left = `${x}px`;
+                    this.clickedNoteElement.style.top = `${y}px`;
+                }
+
                 
-                this.clickedNoteElement.style.left = `${x}px`;
-                this.clickedNoteElement.style.top = `${y}px`;
             }
 
         });
@@ -542,9 +603,10 @@ class Song{
             const summaryNote = document.createElement('div');
             summaryNote.className = `summaryNote sid-${id} ${id === this.selectNoteId && "highlight"}`;
             //50/2 = 0.5초
+            //0.5초만큼 전에 노트 출현 & 0.3초 만큼 후에 노트 제거
             summaryNote.style = `
                 left: ${time * SMRY_WIDTH_PER_SEC - SMRY_WIDTH_PER_SEC/2}px;
-                width: ${noteRange * SMRY_WIDTH_PER_SEC + SMRY_WIDTH_PER_SEC/2}px;
+                width: ${noteRange * SMRY_WIDTH_PER_SEC + SMRY_WIDTH_PER_SEC/2 + SMRY_WIDTH_PER_SEC/3}px;
                 background-color: ${type === NOTE_TYPE.long ? '#87ceeb' : type === NOTE_TYPE.slide ? 'orange' : 'white'};
             `;
             //시작, 끝 시간 표시
@@ -557,13 +619,11 @@ class Song{
             endTimeEle.style = `font-size : 10px; height:10px; margin-left: auto;`;
             endTimeEle.innerText = (time + noteRange).toFixed(2);
 
-            //롱노트 치는 타이밍
-            if(type === NOTE_TYPE.long){
-                const border = document.createElement('div');
-                border.className = "summaryLong";
-                summaryNote.append(border);
-            }
-
+            //노트 치는 타이밍 라인 표시
+            const border = document.createElement('div');
+            border.className = "summaryTiming";
+            summaryNote.append(border);
+            
             //클릭이벤트
             summaryNote.addEventListener("click",this.summaryNoteClickEvent);
 
@@ -666,6 +726,8 @@ class Song{
     }
 
     frame(){
+        // console.log(this.movingNoteId);
+        
         //시간, 바 표시
         this.playbackRangeElement.value = this.sound.seek() * 100;
         this.changeTimeElement();
@@ -677,7 +739,9 @@ class Song{
         this.pattern.forEach((note, index) =>{
 
             //노트 표시
-            if(this.sound.seek() <= note.endTime && this.sound.seek() > note.time - 0.5){
+            if(this.sound.seek() <= note.endTime + 0.3  //노트 끝나는 +0.3 초 보다 전 (late판정까지)
+                && this.sound.seek() > note.time - 0.5 //노트 시작시간 -0.5초 보다 후(alive 0.5초 전에 노트 출현) 
+            ){
                 const div =document.querySelector(`.id-${note.id}`);
     
                 if(div){
@@ -700,7 +764,7 @@ class Song{
                     align-items: center;
                 `;
                 diamondDiv.innerHTML = `
-                <div style='transform: rotate(-45deg);' class="note id-${note.id}">${note.id}</div>
+                <div style='transform: rotate(-45deg); pointer-events: none;' class="note id-${note.id}">${note.id}</div>
                 `;
                 this.screen.appendChild(diamondDiv);
 
@@ -874,5 +938,9 @@ function addsong(event) {
             // Chrome에서는 returnValue 설정이 필요함
             event.returnValue = '';
           });
+
+        window.oncontextmenu = (e)=>{
+            return false;
+        }
     }
 }
